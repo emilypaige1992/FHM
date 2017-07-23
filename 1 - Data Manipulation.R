@@ -4,15 +4,15 @@
 
 #import libraries
 library(rJava)
-
+library(readxl)
 #read in the data
-FP = read_xlsx("C:/Users/Emily/Desktop/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Table-Ever Used FP",
+FP = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Table-Ever Used FP",
                    col_names = TRUE, range = "A1:EM498")
-nomorekids = read_xlsx("C:/Users/Emily/Desktop/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Women-No More Kids",
+nomorekids = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Women-No More Kids",
                col_names = TRUE, range = "A1:EM390")
-nokids = read_xlsx("C:/Users/Emily/Desktop/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Women-Nulliparous",
+nokids = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Women-Nulliparous",
                        col_names = TRUE, range = "A1:EM147")
-full = read_xlsx("C:/Users/Emily/Desktop/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data with Age Coded",
+full = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data with Age Coded",
                    col_names = TRUE, range = "A1:EM711")
 
 #add dataset flag
@@ -50,14 +50,16 @@ haiti$TFP_asormore_effective[haiti$`C36=TFP_vs_MFP` <= 1] = 1
 #FP affordable, FP convenient, 
 #***TFP effective***, 
 
-
+##########################
+#covariates of interest
+##########################
 #Schatzi covariates
 #main interest: TFP methods effective
 #socio-economic status - education, employment status, etc.
 #prior pregnancy, wanting no more children,
 #never had children.
 
-#Questions of interest (for us
+#Questions of interest (for us)
 haiti$`C34=FP_effective`
 haiti$gender
 haiti$`A1=age (years)`
@@ -83,5 +85,37 @@ haiti$`B13=aware_FP`
 haiti$`B22=know_side_effects`
 haiti$`B24=traditional_FP`
 
+##########################
+#outcomes of interest
+##########################
+haiti$`D42=ever_use_FP`
+#create outcome for "currently use MFP"
+haiti$use_MFP = NA
+haiti$use_MFP[haiti$`D43a.1=which_FP` == "0,1" |
+                haiti$`D43a.1=which_FP` == "1" |
+                haiti$`D43a.1=which_FP` == "1 and 4" |
+                haiti$`D43a.1=which_FP` == "1,4" |
+                haiti$`D43a.1=which_FP` == "10" |
+                haiti$`D43a.1=which_FP` == "2" |
+                haiti$`D43a.1=which_FP` == "3" |
+                haiti$`D43a.1=which_FP` == "3,4" | 
+                haiti$`D43a.1=which_FP` == "4" |
+                haiti$`D43a.1=which_FP` == "5" |
+                haiti$`D43a.1=which_FP` == "6" |
+                haiti$`D43a.1=which_FP` == "7" ] = 1
+                #haiti$`D43a.1=which_FP` == "8" |
+haiti$use_MFP[haiti$`D43a.1=which_FP` == "11" |
+                haiti$`D43a.1=which_FP` == "0" |
+                haiti$`D43a.1=which_FP` == "9" |
+                haiti$`D42=ever_use_FP` == 0] = 0  #used Q42 to fill in those who don't use MFP
+table(haiti$use_MFP)
+#Is using a calendar considered TFP??? 
+#Need to discuss recoding "Other" fill in answers
+table(haiti$`D43a.1=which_FP`)
+table(haiti$`D43a.1.1=which_FP_other`)
+
+
+#logistic regression model
+#logit = glm(use_MFP ~ , data=haiti, family = "binomial")
 
 
