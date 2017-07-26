@@ -12,21 +12,23 @@ nomorekids = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Da
                col_names = TRUE, range = "A1:EM390")
 nokids = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Women-Nulliparous",
                        col_names = TRUE, range = "A1:EM147")
-full = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data with Age Coded",
+full = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
                    col_names = TRUE, range = "A1:EM711")
 
+haiti = full
+
 #add dataset flag
-FP$FPset = "Have Ever Used FP"
-FP$set = NA
-nomorekids$FPset = NA
-nomorekids$set = "No More Chlidren"
-nokids$FPset = NA
-nokids$set = "No Children"
+#FP$FPset = "Have Ever Used FP"
+#FP$set = NA
+#nomorekids$FPset = NA
+#nomorekids$set = "No More Chlidren"
+#nokids$FPset = NA
+#nokids$set = "No Children"
 
 
-temp = rbind(FP,nomorekids,nokids)
+#temp = rbind(FP,nomorekids,nokids)
 
-haiti = temp[match(unique(temp$`survey #`),temp$'survey #'),]
+#haiti = temp[match(unique(temp$`survey #`),temp$'survey #'),]
 
 #check missingness for belief in 
 #traditional family planning
@@ -62,7 +64,7 @@ haiti$TFP_asormore_effective[haiti$`C36=TFP_vs_MFP` <= 1] = 1
 #Questions of interest (for us)
 haiti$`C34=FP_effective`
 haiti$gender
-haiti$`A1=age (years)`
+haiti$`A1=age (years)` #make numeric (fix stuff)
 haiti$`A2=phone`
 haiti$`A3=education_level`
 haiti$`A4=work_status`
@@ -84,11 +86,36 @@ haiti$`B13=aware_FP`
 #Q21 - could be used for flag of people who only know about surgery modern FP 
 haiti$`B22=know_side_effects`
 haiti$`B24=traditional_FP`
+haiti$`C25=spacing`
+haiti$`C26=no_protection`
+haiti$`C27=unwanted_pregnancy_bad` #recode 0,1 to 9
+haiti$`C28=FP_befort_1st_kid`
+haiti$`C31=allow_FP` #break up into two variables - religion allow, community allow
+haiti$`C32=FP_expensive`
+haiti$`C32=FP_expensive`[haiti$`C32=FP_expensive` == "1 (is cheap)" ] = "1"
+haiti$`C32=FP_expensive` = as.numeric(haiti$`C32=FP_expensive`)
+haiti$`C33=FP_accessible`
+haiti$`C34=FP_effective` #subset to 1's
+haiti$`C35=TFP_continue_ineff`
+haiti$`C36=TFP_vs_MFP`
+haiti$`C38.1=FP_hidden` #would hide = no, would not hide = yes
+haiti$`C38.2=FP_surgery` #it depends category for weird ones
+haiti$`D41=sexual_debut` #categorize??
+#haiti$`D43a.4.1=what_side_effect`
+#haiti$`D43a.4.2=other_method`#hmmmmmm....
+#haiti$`D43a.5.1=self_access_how`
+
+table(haiti$`D43a.5.1=self_access_how`) 
+table(haiti$`D45=why_not`)
 
 ##########################
 #outcomes of interest
 ##########################
 haiti$`D42=ever_use_FP`
+table(haiti$`D42=ever_use_FP`)
+
+table(haiti$`D43a.1=which_FP`)
+table(haiti$`D43a.1.1=which_FP_other`) #ask if traditional
 #create outcome for "currently use MFP"
 haiti$use_MFP = NA
 haiti$use_MFP[haiti$`D43a.1=which_FP` == "0,1" |
@@ -109,6 +136,7 @@ haiti$use_MFP[haiti$`D43a.1=which_FP` == "11" |
                 haiti$`D43a.1=which_FP` == "9" |
                 haiti$`D42=ever_use_FP` == 0] = 0  #used Q42 to fill in those who don't use MFP
 table(haiti$use_MFP)
+
 #Is using a calendar considered TFP??? 
 #Need to discuss recoding "Other" fill in answers
 table(haiti$`D43a.1=which_FP`)
