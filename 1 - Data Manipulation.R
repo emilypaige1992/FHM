@@ -68,11 +68,10 @@ haiti$`A1=age (years)` #make numeric (fix stuff)
 haiti$`A2=phone`
 haiti$`A3=education_level`
 haiti$`A4=work_status`
-haiti$`A5=income` #character
+table(haiti$`A5=income`) #character - change unsure to 9
 haiti$`A7=partner`
 haiti$`A8=sexually_active`
 haiti$`A9.1=number_kids`
-#recode pregant to 1s and
 haiti$`A9.1=number_kids`[(haiti$`A9.1=number_kids`=="pregnant") | 
                            (haiti$`A9.1=number_kids`=="6 month pregnant baby")] = "1"
 haiti$`A9.1=number_kids`[(haiti$`A9.1=number_kids`=="4 living, 11 deceased")] = "15"
