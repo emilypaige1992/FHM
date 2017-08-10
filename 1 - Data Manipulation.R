@@ -1,10 +1,11 @@
 #FHM Analysis
-#Emily Perry
+#DH5
 #19Jul2017
 
 #import libraries
 library(rJava)
 library(readxl)
+
 #read in the data
 FP = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Table-Ever Used FP",
                    col_names = TRUE, range = "A1:EM498")
@@ -12,10 +13,9 @@ nomorekids = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Da
                col_names = TRUE, range = "A1:EM390")
 nokids = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Women-Nulliparous",
                        col_names = TRUE, range = "A1:EM147")
-full = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
+haiti = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
                    col_names = TRUE, range = "A1:EM711")
 
-haiti = full
 
 #add dataset flag
 #FP$FPset = "Have Ever Used FP"
@@ -63,11 +63,57 @@ haiti$TFP_asormore_effective[haiti$`C36=TFP_vs_MFP` <= 1] = 1
 
 #Questions of interest (for us)
 haiti$`C34=FP_effective`
+haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="NA"] = "Don't Know"
+haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="0"] = "No"
+haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="1"] = "Yes"
+haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="9"] = "Don't Know"
 haiti$gender
 haiti$`A1=age (years)` #make numeric (fix stuff)
 haiti$`A2=phone`
 haiti$`A3=education_level`
+
+# creating names for work status;
 haiti$`A4=work_status`
+
+table(haiti$`A4=work_status`)
+
+cnames <- c("None", "Accountant", "Assistant", "Advocate", "Burser",
+            "Cashier", "Clothes Maker", "Computer Specialist",
+            "Constable", "Cook/Chef", "Pastry Chef", "Cosmetologist",
+            "Farmer", "Florist", "Gardener", "Health Agent",
+            "Housewife", "Laboratory Technician", "Laundry", "Management", "Messenger",
+            "Mill Worker", "Nurse", "Nursing Aide", "Nutritionist", "Pharmacist", 
+            "Receptionist", "Saleswoman", "Secretary", "Statistician", 
+            "Student", "Teacher", "Videographer", "Waitress", "Librarian", "Typist", 
+            "Musician", "Librarian", "filler1" , "filler2", "Actress", "Bank Technician",
+            "Medical Technician", "Factory Operator", "Other", "Business", "Archivist",
+            "Agronomist", "Marine Inspector", "Entry Operator", "Janitor/Cleaner", 
+            "Journalist" ,"TV Presenter", "Hostess", 
+            "Housekeeper", "Preacher", "Counselor", "Principal/Headmistress")
+
+
+haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "18, 27"] = 18
+haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "27, 1"] = 1
+haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "27, 12"] = 12
+haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "27, 30" | haiti$"A4.1=occupation" == "27,30"] = 30
+haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "27,35"] = 35
+haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "6,27"] = 6
+haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "9 and 27"] = 9
+haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "student"] = "Student"
+haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "construction"] = "Construction"
+haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "woodworker"] = "Woodworker"
+
+for (i in 0:57){
+  haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == i] <- cnames[i+1]
+}
+
+
+haiti$occupation2 = haiti$"A4.1=occupation"
+haiti$occupation2[haiti$"A4.1=occupation" %in% c("Accountant","Business","Journalist","Typist","Nurse","Teacher")] = "Technical"
+haiti$occupation2[haiti$"A4.1=occupation" %in% c("Farmer","Housekeeper","Laundry","Clothes Maker","Woodworker","Construction", "Cook/Chef","Cosmetologist")] = "Trade"
+haiti$occupation2[is.na(haiti$`A4.1=occupation`)] = "Unknown"
+haiti$occupation2[haiti$`A4.1=occupation`=="None"] = "Unknown"
+
 table(haiti$`A5=income`) #character - change unsure to 9
 haiti$`A7=partner`
 haiti$`A8=sexually_active`
@@ -76,9 +122,30 @@ haiti$`A9.1=number_kids`[(haiti$`A9.1=number_kids`=="pregnant") |
                            (haiti$`A9.1=number_kids`=="6 month pregnant baby")] = "1"
 haiti$`A9.1=number_kids`[(haiti$`A9.1=number_kids`=="4 living, 11 deceased")] = "15"
 haiti$`A9.1=number_kids` = as.numeric(haiti$`A9.1=number_kids`)
-haiti$`A10=more_kids`#important
+haiti$`A10=more_kids` #important
 haiti$`A11=decides_number_kids`
-haiti$`A11.1=decides__kids_specify` #needs SERIOUS WORK
+table(haiti$`A11.1=decides__kids_specify`) #needs SERIOUS WORK
+haiti$decide_kids = ifelse(haiti$`A11=decides_number_kids`==8,haiti$`A11.1=decides__kids_specify`,
+                           haiti$`A11=decides_number_kids`)
+x = haiti$decide_kids
+x[x==0] = "Myself"
+x[x==1] = "Partner"
+x[x==2] = "Family"
+x[x==3] = "Religion"
+x[x==4] = "Community"
+x[x==5] = "Couple"
+x[x==6] = "Fate"
+x[x==7] = "God"
+x[x==9] = NA
+x[x=="doctor"] = "Doctor"
+x[x=="none/couldn't get pregnant" | 
+    x=="can't have kids because she had to have her cervix removed" | 
+    x=="had fertility issues" | 
+    x=="her health"] = "Health"
+x[x=="herself and god" | x=="myself and god"] = "Myself & God"
+x[x=="doesn't have kids"] = NA
+haiti$decide_kids = x
+
 haiti$`A12=plan_kids`
 haiti$`B13=aware_FP`
 #if no, skip to question #21
@@ -111,6 +178,9 @@ table(haiti$`D45=why_not`)
 #outcomes of interest
 ##########################
 haiti$`D42=ever_use_FP`
+haiti$`D42=ever_use_FP`[is.na(haiti$`D42=ever_use_FP`)]="NA"
+haiti$`D42=ever_use_FP`[haiti$`D42=ever_use_FP`=="0"]="No"
+haiti$`D42=ever_use_FP`[haiti$`D42=ever_use_FP`=="1"]="Yes"
 table(haiti$`D42=ever_use_FP`)
 
 table(haiti$`D43a.1=which_FP`)
