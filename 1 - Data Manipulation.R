@@ -67,8 +67,21 @@ haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="NA"] = "Don't Know"
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="0"] = "No"
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="1"] = "Yes"
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="9"] = "Don't Know"
-haiti$gender
+Men = haiti[(haiti$gender == 0),]
+haiti = haiti[(haiti$gender == 1),]
+
 haiti$`A1=age (years)` #make numeric (fix stuff)
+haiti <- haiti[haiti$`A1=age (years)`!="doesn't remember",]
+haiti$`A1=age (years)`[haiti$`A1=age (years)`=="70-80"] <- "75" 
+haiti$`A1=age (years)`[haiti$`A1=age (years)`=="somewhere between 36-40"] <- "38"
+haiti$`A1=age (years)`[haiti$`A1=age (years)`=="over 60"] <- "60"
+haiti$`A1=age (years)`<-as.numeric(haiti$`A1=age (years)`)
+haiti <- haiti[haiti$`A1=age (years)`>=18,]
+haiti <- haiti[haiti$`A1=age (years)`<=49,]
+haiti$AgeBin <- ifelse(haiti$`A1=age (years)`<20,"18-19",
+                        ifelse(haiti$`A1=age (years)`<30,"20-29",
+                               ifelse(haiti$`A1=age (years)`<40,"30-39",
+                                      "40-49")))
 haiti$`A2=phone`
 haiti$`A3=education_level`
 
@@ -182,9 +195,9 @@ haiti$`D42=ever_use_FP`[is.na(haiti$`D42=ever_use_FP`)]="NA"
 haiti$`D42=ever_use_FP`[haiti$`D42=ever_use_FP`=="0"]="No"
 haiti$`D42=ever_use_FP`[haiti$`D42=ever_use_FP`=="1"]="Yes"
 table(haiti$`D42=ever_use_FP`)
-
 table(haiti$`D43a.1=which_FP`)
 table(haiti$`D43a.1.1=which_FP_other`) #ask if traditional
+
 #create outcome for "currently use MFP"
 haiti$use_MFP = NA
 haiti$use_MFP[haiti$`D43a.1=which_FP` == "0,1" |
@@ -198,21 +211,19 @@ haiti$use_MFP[haiti$`D43a.1=which_FP` == "0,1" |
                 haiti$`D43a.1=which_FP` == "4" |
                 haiti$`D43a.1=which_FP` == "5" |
                 haiti$`D43a.1=which_FP` == "6" |
-                haiti$`D43a.1=which_FP` == "7" ] = 1
+                haiti$`D43a.1=which_FP` == "7" |
+                haiti$`D43a.1.1=which_FP_other` == "4"] = 1
                 #haiti$`D43a.1=which_FP` == "8" |
 haiti$use_MFP[haiti$`D43a.1=which_FP` == "11" |
                 haiti$`D43a.1=which_FP` == "0" |
                 haiti$`D43a.1=which_FP` == "9" |
-                haiti$`D42=ever_use_FP` == 0] = 0  #used Q42 to fill in those who don't use MFP
+                haiti$`D42=ever_use_FP` == "No"] = 0  #used Q42 to fill in those who don't use MFP
 table(haiti$use_MFP)
 
-#Is using a calendar considered TFP??? 
-#Need to discuss recoding "Other" fill in answers
-table(haiti$`D43a.1=which_FP`)
-table(haiti$`D43a.1.1=which_FP_other`)
+#Outcome "will ever use MFP"
+table(haiti$`D44=everuse_MFP`)
+haiti$`D44=everuse_MFP`[haiti$`D44=everuse_MFP` == "9"] = NA
+haiti$`D44=everuse_MFP`[haiti$`D44=everuse_MFP` == "maybe"] = NA
 
-
-#logistic regression model
-#logit = glm(use_MFP ~ , data=haiti, family = "binomial")
 
 
