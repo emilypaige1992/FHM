@@ -55,6 +55,7 @@ haiti$TFP_asormore_effective[haiti$`C36=TFP_vs_MFP` <= 1] = 1
 ##########################
 #covariates of interest
 ##########################
+
 #Schatzi covariates
 #main interest: TFP methods effective
 #socio-economic status - education, employment status, etc.
@@ -63,13 +64,13 @@ haiti$TFP_asormore_effective[haiti$`C36=TFP_vs_MFP` <= 1] = 1
 
 #Questions of interest (for us)
 haiti$`C34=FP_effective`
-haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="NA"] = "Don't Know"
+haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="NA"] = NA
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="0"] = "No"
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="1"] = "Yes"
-haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="9"] = "Don't Know"
+haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="9"] = NA
 Men = haiti[(haiti$gender == 0),]
 haiti = haiti[(haiti$gender == 1),]
-
+table(haiti$`C34=FP_effective`)
 haiti$`A1=age (years)` #make numeric (fix stuff)
 haiti <- haiti[haiti$`A1=age (years)`!="doesn't remember",]
 haiti$`A1=age (years)`[haiti$`A1=age (years)`=="70-80"] <- "75" 
