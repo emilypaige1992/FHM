@@ -2,7 +2,7 @@
 #DH5
 #09Aug2017
 
-#Input Data
+#Libraries
 library(ggplot2)
 
 #read in the cleaned data

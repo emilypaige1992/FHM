@@ -160,7 +160,9 @@ x[x=="herself and god" | x=="myself and god"] = "Myself & God"
 x[x=="doesn't have kids"] = NA
 haiti$decide_kids = x
 
-haiti$`A12=plan_kids`
+haiti$`A12=plan_kids`[haiti$`A12=plan_kids` == "9"] = NA
+haiti$`A12=plan_kids`[haiti$`A12=plan_kids` == "NA"] = NA
+
 haiti$`B13=aware_FP`
 #if no, skip to question #21
 #Q21 - could be used for flag of people who only know about surgery modern FP 
