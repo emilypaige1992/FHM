@@ -34,10 +34,19 @@ summary(logit2)
 haiti2 = haiti[,c("use_MFP", "C34=FP_effective","AgeBin","A2=phone","A3=education_level","A4=work_status", 
                    "A7=partner","A8=sexually_active","A9=children",
                    "A10=more_kids","A12=plan_kids")]
+haiti2 = haiti2[complete.cases(haiti2),]
 
-logit3 = glm(haiti2$use_MFP ~ .*., data=haiti2, family = "binomial")
+logit3 = glm(haiti2$use_MFP ~ ., data=haiti2, family = "binomial")
+summary(logit3)
 
-step <- stepAIC(logit3, direction="both")
+step <- stepAIC(logit3, direction="backward", K = 2.7)
+step$anova
+summary(step)
+
+logit4 = glm(haiti2$use_MFP ~ .*., data=haiti2, family = "binomial")
+summary(logit3)
+
+step <- stepAIC(logit4, direction="backward", K = 2.7)
 step$anova
 summary(step)
 
