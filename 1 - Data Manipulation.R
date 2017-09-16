@@ -2,6 +2,7 @@
 #DH5
 #19Jul2017
 
+
 #import libraries
 library(rJava)
 library(readxl)
@@ -13,9 +14,8 @@ nomorekids = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Da
                col_names = TRUE, range = "A1:EM390")
 nokids = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Women-Nulliparous",
                        col_names = TRUE, range = "A1:EM147")
-haiti = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
+haiti <- read_xlsx("/Users/Kirsten/Desktop/dh5/Haiti_Contracept/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
                    col_names = TRUE, range = "A1:EM711")
-
 
 #add dataset flag
 #FP$FPset = "Have Ever Used FP"
@@ -40,7 +40,6 @@ table(haiti$`C36=TFP_vs_MFP`)
 haiti$TFP_asormore_effective = 0
 haiti$TFP_asormore_effective[haiti$`C36=TFP_vs_MFP` <= 1] = 1
 
-
 #potential covariates of interest:
 #gender, age, education, work status
 #income, partner, sexually active,
@@ -63,15 +62,48 @@ haiti$TFP_asormore_effective[haiti$`C36=TFP_vs_MFP` <= 1] = 1
 #never had children.
 
 #Questions of interest (for us)
-haiti$`C34=FP_effective`
+
+#===========   Labeling FP_effective variable   ===========#
+table(haiti$`C34=FP_effective`)
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="NA"] = NA
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="0"] = "No"
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="1"] = "Yes"
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="9"] = NA
-Men = haiti[(haiti$gender == 0),]
-haiti = haiti[(haiti$gender == 1),]
+
+
+
+Men = haiti[(haiti$gender == 0),]                               #What is this line doing?
+haiti = haiti[(haiti$gender == 1),]                             # What is this line doing?
 table(haiti$`C34=FP_effective`)
+
+
+
+#==========================================================#
+#======      Correcting Age variable discrepencies  ======#
+#==========================================================#
+table(haiti$`A1=age (years)`)
 haiti$`A1=age (years)` #make numeric (fix stuff)
+
+age <- haiti$`A1=age (years)`
+
+age[age == "70-80"] <- "75" 
+age[age == "over 60"] <- "60"
+age[age == "somewhere between 36-40"] <- "38"
+
+age <- age[age != "doesn't remember"]
+age <- as.numeric(age)
+
+newage <- age[age >=18 & age <=49]
+
+test <- newage
+test[test<=19] <- "18-19"
+test[test>19 & test<=29] <- "20-29"
+test[test>29 & test<=39] <- "30-39"
+test[test>39] <- "40-49"
+
+comp <- data.frame(newage,test); head(comp)
+
+
 haiti <- haiti[haiti$`A1=age (years)`!="doesn't remember",]
 haiti$`A1=age (years)`[haiti$`A1=age (years)`=="70-80"] <- "75" 
 haiti$`A1=age (years)`[haiti$`A1=age (years)`=="somewhere between 36-40"] <- "38"
