@@ -63,64 +63,55 @@ haiti$TFP_asormore_effective[haiti$`C36=TFP_vs_MFP` <= 1] = 1
 
 #Questions of interest (for us)
 
-#===========   Labeling FP_effective variable   ===========#
+#==============   Labeling FP_effective variable   ================#
 table(haiti$`C34=FP_effective`)
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="NA"] = NA
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="0"] = "No"
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="1"] = "Yes"
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="9"] = NA
 
-
-
-Men = haiti[(haiti$gender == 0),]                               #What is this line doing?
-haiti = haiti[(haiti$gender == 1),]                             # What is this line doing?
 table(haiti$`C34=FP_effective`)
 
 
 
-#==========================================================#
-#======      Correcting Age variable discrepencies  ======#
-#==========================================================#
+#==============     Remove According to Protocol     ==============#
+haiti <- haiti[(haiti$gender == 1),]               # removing men
+
+haiti <- haiti[haiti$`A1=age (years)`>=18,]        # removing based on age limit 18-49
+haiti <- haiti[haiti$`A1=age (years)`<=49,]        # removing based on age limit 18-49
+haiti <- haiti[haiti$`A1=age (years)`!="doesn't remember",]    
+#remove since don't know if age meets criteria
+
+
+
+
+
+#==================================================================#
+#==========      Correcting Age variable discrepencies  ===========#
+#==================================================================#
 table(haiti$`A1=age (years)`)
-haiti$`A1=age (years)` #make numeric (fix stuff)
-
-age <- haiti$`A1=age (years)`
-
-age[age == "70-80"] <- "75" 
-age[age == "over 60"] <- "60"
-age[age == "somewhere between 36-40"] <- "38"
-
-age <- age[age != "doesn't remember"]
-age <- as.numeric(age)
-
-newage <- age[age >=18 & age <=49]
-
-test <- newage
-test[test<=19] <- "18-19"
-test[test>19 & test<=29] <- "20-29"
-test[test>29 & test<=39] <- "30-39"
-test[test>39] <- "40-49"
-
-comp <- data.frame(newage,test); head(comp)
 
 
-haiti <- haiti[haiti$`A1=age (years)`!="doesn't remember",]
 haiti$`A1=age (years)`[haiti$`A1=age (years)`=="70-80"] <- "75" 
 haiti$`A1=age (years)`[haiti$`A1=age (years)`=="somewhere between 36-40"] <- "38"
 haiti$`A1=age (years)`[haiti$`A1=age (years)`=="over 60"] <- "60"
 haiti$`A1=age (years)`<-as.numeric(haiti$`A1=age (years)`)
-haiti <- haiti[haiti$`A1=age (years)`>=18,]
-haiti <- haiti[haiti$`A1=age (years)`<=49,]
+
+
+#===================      making the age bins     =======================#
 haiti$AgeBin <- ifelse(haiti$`A1=age (years)`<20,"18-19",
                         ifelse(haiti$`A1=age (years)`<30,"20-29",
                                ifelse(haiti$`A1=age (years)`<40,"30-39",
                                       "40-49")))
+
+
 haiti$`A2=phone`
 haiti$`A3=education_level`
 
-# creating names for work status;
-haiti$`A4=work_status`
 
+
+#================      creating names for work status  =================#
+haiti$`A4=work_status`
 table(haiti$`A4=work_status`)
 
 cnames <- c("None", "Accountant", "Assistant", "Advocate", "Burser",
@@ -138,6 +129,8 @@ cnames <- c("None", "Accountant", "Assistant", "Advocate", "Burser",
             "Housekeeper", "Preacher", "Counselor", "Principal/Headmistress")
 
 
+#================  reducing two occupations to one  ===================#
+
 haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "18, 27"] = 18
 haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "27, 1"] = 1
 haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "27, 12"] = 12
@@ -154,20 +147,58 @@ for (i in 0:57){
 }
 
 
-haiti$occupation2 = haiti$"A4.1=occupation"
-haiti$occupation2[haiti$"A4.1=occupation" %in% c("Accountant","Business","Journalist","Typist","Nurse","Teacher")] = "Technical"
-haiti$occupation2[haiti$"A4.1=occupation" %in% c("Farmer","Housekeeper","Laundry","Clothes Maker","Woodworker","Construction", "Cook/Chef","Cosmetologist")] = "Trade"
-haiti$occupation2[is.na(haiti$`A4.1=occupation`)] = "Unknown"
-haiti$occupation2[haiti$`A4.1=occupation`=="None"] = "Unknown"
 
+
+
+
+#========== Making bins for occupation and creating occupation2  ========#
+haiti$occupation2 <- haiti$"A4.1=occupation"
+haiti$occupation2[haiti$"A4.1=occupation" %in% c("Accountant","Business","Journalist","Typist","Nurse","Teacher")] <- "Technical"
+haiti$occupation2[haiti$"A4.1=occupation" %in% c("Farmer","Housekeeper","Laundry","Clothes Maker","Woodworker","Construction", "Cook/Chef","Cosmetologist")] <- "Trade"
+haiti$occupation2[is.na(haiti$`A4.1=occupation`)==TRUE] <- "Unknown"
+haiti$occupation2[haiti$`A4.1=occupation`=="None"] <- "Unknown"
+
+
+
+
+
+#==================      Cleaning income variable    ===================#
 table(haiti$`A5=income`) #character - change unsure to 9
+
+haiti$clean_inc <- haiti$`A5=income`
+
+haiti$clean_inc[haiti$clean_inc %in% c("doesn't kno","unsure","depends",9)] <- NA
+# 9 is missing in the questionnaire
+
+#============ for the range answers, take the average    ===============#
+haiti$clean_inc[haiti$clean_inc == "12000-15000"] <- (12000+15000)/2
+haiti$clean_inc[haiti$clean_inc == "1500-3000"] <- (1500+3000)/2
+haiti$clean_inc[haiti$clean_inc == "1500 to 3000"] <- (1500+3000)/2
+haiti$clean_inc[haiti$clean_inc == "1500-2000"] <- (1500+2000)/2
+haiti$clean_inc[haiti$clean_inc == "15000-18000"] <- (15000+18000)/2
+haiti$clean_inc[haiti$clean_inc == "20000-25000"] <- (20000+25000)/2
+haiti$clean_inc[haiti$clean_inc == "4000-8000"] <- (4000+8000)/2
+haiti$clean_inc[haiti$clean_inc == "4000 to 8000"] <- (4000+8000)/2
+
+haiti$clean_inc <- as.numeric(haiti$clean_inc)
+
+
+
+
 haiti$`A7=partner`
 haiti$`A8=sexually_active`
+
+
+
+#==================      Updating number_kids variable    =================#
 haiti$`A9.1=number_kids`
 haiti$`A9.1=number_kids`[(haiti$`A9.1=number_kids`=="pregnant") | 
                            (haiti$`A9.1=number_kids`=="6 month pregnant baby")] = "1"
 haiti$`A9.1=number_kids`[(haiti$`A9.1=number_kids`=="4 living, 11 deceased")] = "15"
 haiti$`A9.1=number_kids` = as.numeric(haiti$`A9.1=number_kids`)
+
+
+
 haiti$`A10=more_kids` #important
 haiti$`A11=decides_number_kids`
 table(haiti$`A11.1=decides__kids_specify`) #needs SERIOUS WORK
