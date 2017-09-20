@@ -106,8 +106,18 @@ haiti$AgeBin <- ifelse(haiti$`A1=age (years)`<20,"18-19",
 
 
 haiti$`A2=phone`
-haiti$`A3=education_level`
 
+
+#================     making education level categorical  ==============#
+ed <- haiti$`A3=education_level`        ### seems like categories are messed up
+ed[ed==0]<- "Never Went to School"
+ed[ed==1]<- "Elementary (Grade 7-11)"
+ed[ed==2] <- "Middle (Grade 3-6)"
+ed[ed==3] <- "High School (Grade 0-2)"
+ed[ed==4] <- "Post-High School"
+ed[ed==9] <- "NA"
+
+haiti$`A3=education_level` <- ed
 
 
 #================      creating names for work status  =================#
