@@ -2,20 +2,14 @@
 #DH5
 #19Jul2017
 
-
 #import libraries
 library(rJava)
 library(readxl)
 
 #read in the data
-FP = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Table-Ever Used FP",
-                   col_names = TRUE, range = "A1:EM498")
-nomorekids = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Women-No More Kids",
-               col_names = TRUE, range = "A1:EM390")
-nokids = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Population-Women-Nulliparous",
-                       col_names = TRUE, range = "A1:EM147")
-haiti <- read_xlsx("/Users/Kirsten/Desktop/dh5/Haiti_Contracept/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
+haiti = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
                    col_names = TRUE, range = "A1:EM711")
+
 
 #add dataset flag
 #FP$FPset = "Have Ever Used FP"
@@ -40,6 +34,7 @@ table(haiti$`C36=TFP_vs_MFP`)
 haiti$TFP_asormore_effective = 0
 haiti$TFP_asormore_effective[haiti$`C36=TFP_vs_MFP` <= 1] = 1
 
+
 #potential covariates of interest:
 #gender, age, education, work status
 #income, partner, sexually active,
@@ -62,66 +57,35 @@ haiti$TFP_asormore_effective[haiti$`C36=TFP_vs_MFP` <= 1] = 1
 #never had children.
 
 #Questions of interest (for us)
-
-#==============   Labeling FP_effective variable   ================#
-table(haiti$`C34=FP_effective`)
+haiti$`C34=FP_effective`
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="NA"] = NA
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="0"] = "No"
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="1"] = "Yes"
 haiti$`C34=FP_effective`[haiti$`C34=FP_effective`=="9"] = NA
-
+Men = haiti[(haiti$gender == 0),]
+haiti = haiti[(haiti$gender == 1),]
 table(haiti$`C34=FP_effective`)
-
-
-
-#==============     Remove According to Protocol     ==============#
-haiti <- haiti[(haiti$gender == 1),]               # removing men
-
-haiti <- haiti[haiti$`A1=age (years)`>=18,]        # removing based on age limit 18-49
-haiti <- haiti[haiti$`A1=age (years)`<=49,]        # removing based on age limit 18-49
-haiti <- haiti[haiti$`A1=age (years)`!="doesn't remember",]    
-#remove since don't know if age meets criteria
-
-
-
-
-
-#==================================================================#
-#==========      Correcting Age variable discrepencies  ===========#
-#==================================================================#
-table(haiti$`A1=age (years)`)
-
-
+haiti$`A1=age (years)` #make numeric (fix stuff)
+haiti <- haiti[haiti$`A1=age (years)`!="doesn't remember",]
 haiti$`A1=age (years)`[haiti$`A1=age (years)`=="70-80"] <- "75" 
 haiti$`A1=age (years)`[haiti$`A1=age (years)`=="somewhere between 36-40"] <- "38"
 haiti$`A1=age (years)`[haiti$`A1=age (years)`=="over 60"] <- "60"
 haiti$`A1=age (years)`<-as.numeric(haiti$`A1=age (years)`)
-
-
-#===================      making the age bins     =======================#
+haiti <- haiti[haiti$`A1=age (years)`>=18,]
+haiti <- haiti[haiti$`A1=age (years)`<=49,]
 haiti$AgeBin <- ifelse(haiti$`A1=age (years)`<20,"18-19",
                         ifelse(haiti$`A1=age (years)`<30,"20-29",
                                ifelse(haiti$`A1=age (years)`<40,"30-39",
                                       "40-49")))
+haiti$`A2=phone`[haiti$`A2=phone` == "9"] = NA
+table(haiti$`A2=phone`)
+haiti$`A3=education_level`
+table(haiti$`A3=education_level`)
 
-
-haiti$`A2=phone`
-
-
-#================     making education level categorical  ==============#
-ed <- haiti$`A3=education_level`        ### seems like categories are messed up
-ed[ed==0]<- "Never Went to School"
-ed[ed==1]<- "Elementary (Grade 7-11)"
-ed[ed==2] <- "Middle (Grade 3-6)"
-ed[ed==3] <- "High School (Grade 0-2)"
-ed[ed==4] <- "Post-High School"
-ed[ed==9] <- "NA"
-
-haiti$`A3=education_level` <- ed
-
-
-#================      creating names for work status  =================#
+haiti[haiti == 9] = NA
+# creating names for work status;
 haiti$`A4=work_status`
+
 table(haiti$`A4=work_status`)
 
 cnames <- c("None", "Accountant", "Assistant", "Advocate", "Burser",
@@ -139,8 +103,6 @@ cnames <- c("None", "Accountant", "Assistant", "Advocate", "Burser",
             "Housekeeper", "Preacher", "Counselor", "Principal/Headmistress")
 
 
-#================  reducing two occupations to one  ===================#
-
 haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "18, 27"] = 18
 haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "27, 1"] = 1
 haiti$"A4.1=occupation"[haiti$"A4.1=occupation" == "27, 12"] = 12
@@ -157,58 +119,20 @@ for (i in 0:57){
 }
 
 
+haiti$occupation2 = haiti$"A4.1=occupation"
+haiti$occupation2[haiti$"A4.1=occupation" %in% c("Accountant","Business","Journalist","Typist","Nurse","Teacher")] = "Technical"
+haiti$occupation2[haiti$"A4.1=occupation" %in% c("Farmer","Housekeeper","Laundry","Clothes Maker","Woodworker","Construction", "Cook/Chef","Cosmetologist")] = "Trade"
+haiti$occupation2[is.na(haiti$`A4.1=occupation`)] = "Unknown"
+haiti$occupation2[haiti$`A4.1=occupation`=="None"] = "Unknown"
 
-
-
-
-#========== Making bins for occupation and creating occupation2  ========#
-haiti$occupation2 <- haiti$"A4.1=occupation"
-haiti$occupation2[haiti$"A4.1=occupation" %in% c("Accountant","Business","Journalist","Typist","Nurse","Teacher")] <- "Technical"
-haiti$occupation2[haiti$"A4.1=occupation" %in% c("Farmer","Housekeeper","Laundry","Clothes Maker","Woodworker","Construction", "Cook/Chef","Cosmetologist")] <- "Trade"
-haiti$occupation2[is.na(haiti$`A4.1=occupation`)==TRUE] <- "Unknown"
-haiti$occupation2[haiti$`A4.1=occupation`=="None"] <- "Unknown"
-
-
-
-
-
-#==================      Cleaning income variable    ===================#
 table(haiti$`A5=income`) #character - change unsure to 9
-
-haiti$clean_inc <- haiti$`A5=income`
-
-haiti$clean_inc[haiti$clean_inc %in% c("doesn't kno","unsure","depends",9)] <- NA
-# 9 is missing in the questionnaire
-
-#============ for the range answers, take the average    ===============#
-haiti$clean_inc[haiti$clean_inc == "12000-15000"] <- (12000+15000)/2
-haiti$clean_inc[haiti$clean_inc == "1500-3000"] <- (1500+3000)/2
-haiti$clean_inc[haiti$clean_inc == "1500 to 3000"] <- (1500+3000)/2
-haiti$clean_inc[haiti$clean_inc == "1500-2000"] <- (1500+2000)/2
-haiti$clean_inc[haiti$clean_inc == "15000-18000"] <- (15000+18000)/2
-haiti$clean_inc[haiti$clean_inc == "20000-25000"] <- (20000+25000)/2
-haiti$clean_inc[haiti$clean_inc == "4000-8000"] <- (4000+8000)/2
-haiti$clean_inc[haiti$clean_inc == "4000 to 8000"] <- (4000+8000)/2
-
-haiti$clean_inc <- as.numeric(haiti$clean_inc)
-
-
-
-
 haiti$`A7=partner`
 haiti$`A8=sexually_active`
-
-
-
-#==================      Updating number_kids variable    =================#
 haiti$`A9.1=number_kids`
 haiti$`A9.1=number_kids`[(haiti$`A9.1=number_kids`=="pregnant") | 
                            (haiti$`A9.1=number_kids`=="6 month pregnant baby")] = "1"
 haiti$`A9.1=number_kids`[(haiti$`A9.1=number_kids`=="4 living, 11 deceased")] = "15"
 haiti$`A9.1=number_kids` = as.numeric(haiti$`A9.1=number_kids`)
-
-
-
 haiti$`A10=more_kids` #important
 haiti$`A11=decides_number_kids`
 table(haiti$`A11.1=decides__kids_specify`) #needs SERIOUS WORK
@@ -237,6 +161,7 @@ haiti$`A12=plan_kids`[haiti$`A12=plan_kids` == "9"] = NA
 haiti$`A12=plan_kids`[haiti$`A12=plan_kids` == "NA"] = NA
 
 haiti$`B13=aware_FP`
+
 #if no, skip to question #21
 #Q21 - could be used for flag of people who only know about surgery modern FP 
 haiti$`B22=know_side_effects`
@@ -297,9 +222,12 @@ haiti$use_MFP[haiti$`D43a.1=which_FP` == "11" |
 table(haiti$use_MFP)
 
 #Outcome "will ever use MFP"
-table(haiti$`D44=everuse_MFP`)
-haiti$`D44=everuse_MFP`[haiti$`D44=everuse_MFP` == "9"] = NA
-haiti$`D44=everuse_MFP`[haiti$`D44=everuse_MFP` == "maybe"] = NA
+table(haiti$`D44=everuse_MFP`) 
+haiti$everuse_MFP = NA
+haiti$everuse_MFP[haiti$`D44=everuse_MFP` == "0"] = 0
+haiti$everuse_MFP[haiti$`D44=everuse_MFP` == "1"] = 1
+haiti$everuse_MFP[haiti$`D44=everuse_MFP` == "9"] = NA
+haiti$everuse_MFP[haiti$`D44=everuse_MFP` == "maybe"] = NA
 
 
 
