@@ -229,5 +229,12 @@ haiti$everuse_MFP[haiti$`D44=everuse_MFP` == "1"] = 1
 haiti$everuse_MFP[haiti$`D44=everuse_MFP` == "9"] = NA
 haiti$everuse_MFP[haiti$`D44=everuse_MFP` == "maybe"] = NA
 
+#impute missing will ever use with current MFP users
+haiti$everuse_MFP[haiti$use_MFP == 1] = 1
 
+#create analysis data set
+analysis = haiti[,c("use_MFP", "everuse_MFP","C34=FP_effective","AgeBin","A2=phone","A3=education_level","A4=work_status", 
+                    "A7=partner","A8=sexually_active","A9=children",
+                    "A10=more_kids","A12=plan_kids")]
+analysis = analysis[complete.cases(analysis),]
 
