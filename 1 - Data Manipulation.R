@@ -122,8 +122,13 @@ for (i in 0:57){
 haiti$occupation2 = haiti$"A4.1=occupation"
 haiti$occupation2[haiti$"A4.1=occupation" %in% c("Accountant","Business","Journalist","Typist","Nurse","Teacher")] = "Technical"
 haiti$occupation2[haiti$"A4.1=occupation" %in% c("Farmer","Housekeeper","Laundry","Clothes Maker","Woodworker","Construction", "Cook/Chef","Cosmetologist")] = "Trade"
-haiti$occupation2[is.na(haiti$`A4.1=occupation`)] = "Unknown"
-haiti$occupation2[haiti$`A4.1=occupation`=="None"] = "Unknown"
+haiti$occupation2[is.na(haiti$`A4.1=occupation`)] = NA
+haiti$occupation2[haiti$`A4.1=occupation`=="None" | haiti$`A4=work_status` == "0"] = "No Job"
+
+
+haiti$job = NA
+haiti$job[haiti$`A4=work_status` == 0] = 0
+haiti$job[haiti$occupation2 != "None"] = 1
 
 table(haiti$`A5=income`) #character - change unsure to 9
 haiti$`A7=partner`
@@ -232,8 +237,9 @@ haiti$everuse_MFP[haiti$`D44=everuse_MFP` == "maybe"] = NA
 #impute missing will ever use with current MFP users
 haiti$everuse_MFP[haiti$use_MFP == 1] = 1
 
+
 #create analysis data set
-analysis = haiti[,c("use_MFP", "everuse_MFP","C34=FP_effective","AgeBin","A2=phone","A3=education_level","A4=work_status", 
+analysis = haiti[,c("use_MFP", "everuse_MFP","C34=FP_effective","AgeBin","A2=phone","A3=education_level","job", 
                     "A7=partner","A8=sexually_active","A9=children",
                     "A10=more_kids","A12=plan_kids")]
 analysis = analysis[complete.cases(analysis),]

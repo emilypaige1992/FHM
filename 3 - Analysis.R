@@ -12,13 +12,14 @@ source("C:\\Users\\Emily\\Desktop\\DH5\\FHM Research\\1 - Data Manipulation.R")
 
 #Logistic Regression - Currently Use MFP
 analysis2 = analysis[,-2]
-
+analysis2$`A3=education_level` = factor(analysis2$`A3=education_level`)
 
 logit1 = glm(use_MFP ~ ., data=analysis2, family = "binomial")
 summary(logit1)
 
 logit1_OR = exp(cbind(OR = coef(logit1),confint(logit1)))
 
+#reduced
 step1 <- stepAIC(logit1, direction="backward", K = 2.7)
 step1$anova
 summary(step1)
@@ -32,8 +33,12 @@ logit2 = glm(everuse_MFP ~ ., data=analysis3, family = "binomial")
 summary(logit2)
 logit2_OR = exp(cbind(OR = coef(logit2),confint(logit2)))
 
+#reduced
 step2 <- stepAIC(logit2, direction="backward", K = 2.7)
 summary(step2)
-step2_OR = exp(cbind(OR = coef(step2),confint(step)))
+step2_OR = exp(cbind(OR = coef(step2),confint(step2)))
 
 
+#####################################################
+# LASSO
+#####################################################
