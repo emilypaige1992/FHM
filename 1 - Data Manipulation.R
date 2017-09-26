@@ -7,8 +7,8 @@ library(rJava)
 library(readxl)
 
 #read in the data
-haiti = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
-                   col_names = TRUE, range = "A1:EM711")
+haiti = read_xlsx("/Users/Kirsten/Desktop/dh5/Haiti_Contracept/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
+                  col_names = TRUE, range = "A1:EM711")
 
 
 #add dataset flag
@@ -128,7 +128,7 @@ haiti$occupation2[haiti$`A4.1=occupation`=="None" | haiti$`A4=work_status` == "0
 
 haiti$job = NA
 haiti$job[haiti$`A4=work_status` == 0] = 0
-haiti$job[haiti$occupation2 != "None"] = 1
+haiti$job[haiti$occupation2 != "No Job"] = 1
 
 table(haiti$`A5=income`) #character - change unsure to 9
 haiti$`A7=partner`
