@@ -138,6 +138,7 @@ haiti$`A9.1=number_kids`[(haiti$`A9.1=number_kids`=="pregnant") |
                            (haiti$`A9.1=number_kids`=="6 month pregnant baby")] = "1"
 haiti$`A9.1=number_kids`[(haiti$`A9.1=number_kids`=="4 living, 11 deceased")] = "15"
 haiti$`A9.1=number_kids` = as.numeric(haiti$`A9.1=number_kids`)
+haiti$`A9.1=number_kids`[haiti$`A9=children`==0]=0
 haiti$`A10=more_kids` #important
 haiti$`A11=decides_number_kids`
 table(haiti$`A11.1=decides__kids_specify`) #needs SERIOUS WORK
@@ -240,7 +241,7 @@ haiti$everuse_MFP[haiti$use_MFP == 1] = 1
 
 #create analysis data set
 analysis = haiti[,c("use_MFP", "everuse_MFP","C34=FP_effective","AgeBin","A2=phone","A3=education_level","job", 
-                    "A7=partner","A8=sexually_active","A9=children",
+                    "A7=partner","A8=sexually_active","A9.1=number_kids",
                     "A10=more_kids","A12=plan_kids")]
 analysis = analysis[complete.cases(analysis),]
 
