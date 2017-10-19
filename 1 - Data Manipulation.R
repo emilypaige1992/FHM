@@ -77,6 +77,9 @@ haiti$AgeBin <- ifelse(haiti$`A1=age (years)`<20,"18-19",
                         ifelse(haiti$`A1=age (years)`<30,"20-29",
                                ifelse(haiti$`A1=age (years)`<40,"30-39",
                                       "40-49")))
+haiti$AgeBin = factor(haiti$AgeBin)
+haiti$AgeBin = relevel(haiti$AgeBin, ref="40-49")
+
 haiti$`A2=phone`[haiti$`A2=phone` == "9"] = NA
 table(haiti$`A2=phone`)
 haiti$`A3=education_level`
@@ -244,4 +247,4 @@ analysis = haiti[,c("use_MFP", "everuse_MFP","C34=FP_effective","AgeBin","A2=pho
                     "A7=partner","A8=sexually_active","A9.1=number_kids",
                     "A10=more_kids","A12=plan_kids")]
 analysis = analysis[complete.cases(analysis),]
-
+analysis$`A3=education_level` = factor(analysis$`A3=education_level`)
