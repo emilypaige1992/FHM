@@ -18,6 +18,14 @@ MFP = analysis[analysis$use_MFP == 1,]
 noMFP = analysis[analysis$use_MFP == 0,]
 
 
+numkids <- MFP$`A9.1=number_kids`
+MFP_nkid <- paste(round(mean(numkids),1),"(",round(sd(numkids),2),")")
+
+noMFPnk <- noMFP$`A9.1=number_kids`
+noMFP_nkid <- paste(round(mean(noMFPnk),1),"(",round(sd(noMFPnk),2),")")
+
+
+
 #making MFP demographics column
 anames <- names(analysis)[3:12]
 
@@ -39,10 +47,10 @@ demo_noMFP <- list()
 for(i in 1:length(anames)){
   nomfp <- noMFP[,i+2]
   t <- table(nomfp)
-  pt <- round((prop.table(table(mfp))*100),2)
+  pt <- round((prop.table(table(nomfp))*100),2)
   result <- paste(t,"(",trimws(pt),"%)")      #get results xx(x.xx%)
   out <-data.frame(names(pt),result)
-  names(out) <- c(as.character(names(MFP[,i+2])),"MFP Result")  #output into list
+  names(out) <- c(as.character(names(noMFP[,i+2])),"MFP Result")  #output into list
   
   demo_noMFP[[i]] <- out
 }
