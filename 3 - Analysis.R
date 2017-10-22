@@ -10,10 +10,42 @@ library(MASS)
 #read in the cleaned data
 source("C:\\Users\\Emily\\Desktop\\DH5\\FHM Research\\1 - Data Manipulation.R")
 
-#demographics
+#========== demographics ============#
+library("stringr")
+
 #seperate datasets by MFP
 MFP = analysis[analysis$use_MFP == 1,]
 noMFP = analysis[analysis$use_MFP == 0,]
+
+
+
+
+demo <- list()
+anames <- names(analysis)[3:12]
+
+for(i in 1:length(anames)){
+  
+  mfp <- MFP[,i+2]
+  t <- table(mfp)
+  pt <- round((prop.table(table(mfp))*100),2)
+  result <- paste(t,"(",trimws(pt),"%)")
+  
+  out <-data.frame(names(pt),result)
+  names(out) <- c(as.character(names(MFP[,i+2])),"MFP Result")
+  
+  demo[[i]] <- out
+}
+
+
+
+mfp <- MFP$AgeBin
+t <- table(mfp)
+pt <- round((prop.table(table(mfp))*100),2)
+result <- paste(t,"(",trimws(pt),"%)")
+out <- data.frame(names(pt),result)
+
+
+
 #TFP Effective
 var = MFP$`C34=FP_effective`
 table(var)
