@@ -7,7 +7,7 @@ library(rJava)
 library(readxl)
 
 #read in the data
-haiti = read_xlsx("C:/Users/Emily/Desktop/DH5/FHM Research/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
+haiti = read_xlsx("/Users/Kirsten/Desktop/dh5/Haiti_Contracept/Contraception Data Analysis SRT 2015-16-Grand Challenges.xlsx",sheet = "Data Entry Sheet",
                    col_names = TRUE, range = "A1:EM711")
 
 
