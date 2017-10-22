@@ -59,8 +59,10 @@ for(i in 1:length(anames)){
 
 
 
-#Logistic Regression - Currently Use MFP
-analysis2 = analysis[,-2]
+#===========  Logistic Regression - Currently Use MFP ============#
+#delete everuse MFP variable
+analysis2 <- analysis[, -which(names(analysis) == "everuse_MFP")]
+
 analysis2$`A3=education_level` = factor(analysis2$`A3=education_level`)
 
 logit1 = glm(use_MFP ~ ., data=analysis2, family = "binomial")
@@ -76,8 +78,12 @@ summary(step1)
 step1_OR = exp(cbind(OR = coef(step1),confint(step1)))
 step1_OR
 
-#Logistic Regression - Will Ever Use MFP
-analysis3 = analysis[,-1]
+
+
+#===========   Logistic Regression - Will Ever Use MFP ============#
+#delete currently use MFP variable
+analysis3 <- analysis[, -which(names(analysis) == "use_MFP")]
+
 analysis3$`A3=education_level` = factor(analysis3$`A3=education_level`)
 
 logit2 = glm(everuse_MFP ~ ., data=analysis3, family = "binomial")
