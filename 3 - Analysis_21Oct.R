@@ -62,40 +62,67 @@ for(i in 1:length(anames)){
 #===========  Logistic Regression - Currently Use MFP ============#
 #delete everuse MFP variable
 analysis2 <- analysis[, -which(names(analysis) == "everuse_MFP")]
-
 analysis2$`A3=education_level` = factor(analysis2$`A3=education_level`)
 
 logit1 = glm(use_MFP ~ ., data=analysis2, family = "binomial")
 summary(logit1)
 
-logit1_OR = exp(cbind(OR = coef(logit1),confint(logit1)))
-logit1_OR
+f1_OR <- round(exp(coef(logit1)),2)
+f1_ci <- round(exp(confint(logit1)),2)
+full1 <- data.frame(names(logit1$coefficients),
+                    paste(f1_OR,"(",f1_ci[,1],",",f1_ci[,2],")"))
+names(full1) <- c("Variable","OR(CI)")
+xtable(full1)                   #### here is the latex code full2
 
-#reduced
+
+
+
+
+#=== Reduced Model
 step1 <- stepAIC(logit1, direction="backward", K = 2.7)
 step1$anova
 summary(step1)
-step1_OR = exp(cbind(OR = coef(step1),confint(step1)))
-step1_OR
+
+r1_OR <- round(exp(coef(step1)),2)
+r1_ci <- round(exp(confint(step1)),2)
+red1 <- data.frame(names(step1$coefficients),
+                   paste(r1_OR,"(",r1_ci[,1],",",r1_ci[,2],")"))
+names(red1) <- c("Variable","OR(CI)")
+xtable(red1)                 #### here is the latex code for red2
+
+
 
 
 
 #===========   Logistic Regression - Will Ever Use MFP ============#
 #delete currently use MFP variable
+library("xtable")
+
 analysis3 <- analysis[, -which(names(analysis) == "use_MFP")]
 
 analysis3$`A3=education_level` = factor(analysis3$`A3=education_level`)
 
 logit2 = glm(everuse_MFP ~ ., data=analysis3, family = "binomial")
 summary(logit2)
-logit2_OR = exp(cbind(OR = coef(logit2),confint(logit2)))
-logit2_OR
+f2_OR <- round(exp(coef(logit2)),2)
+f2_ci <- round(exp(confint(logit2)),2)
+full2 <- data.frame(names(logit2$coefficients),
+                    paste(f2_OR,"(",f2_ci[,1],",",f2_ci[,2],")"))
+names(full2) <- c("Variable","OR(CI)")
+xtable(full2)                   #### here is the latex code full2
 
-#reduced
+
+#=== Reduced Model
 step2 <- stepAIC(logit2, direction="backward", K = 2.7)
 summary(step2)
-step2_OR = exp(cbind(OR = coef(step2),confint(step2)))
-step2_OR
+
+r2_OR <- round(exp(coef(step2)),2)
+r2_ci <- round(exp(confint(step2)),2)
+red2 <- data.frame(names(step2$coefficients),
+                    paste(r2_OR,"(",r2_ci[,1],",",r2_ci[,2],")"))
+names(red2) <- c("Variable","OR(CI)")
+xtable(red2)                 #### here is the latex code for red2
+
 
 #####################################################
 # LASSO
